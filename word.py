@@ -1,7 +1,12 @@
 import docx
 import datetime
 import getArgs
+import os
+import time
 
+
+global pro_name
+pro_name = getArgs.getArgs("模板变量.txt")["项目名称"]
 
 def _log(string):
     def outter(fun):
@@ -27,8 +32,9 @@ class WordSub:
             raise Exception("请查看一下是否变量名称错误->"+var)
         return lst[var.strip("{}")]
 
-    @_log("Start logging")
+    @_log(pro_name)
     def run(self):
+        print("wait for ",str(self.out_file_name))
         for num,para in enumerate(self.word_file.paragraphs):
             print("Processing:",num,'/',self.count,end="  ")
             global var
@@ -80,10 +86,17 @@ class WordSub:
 
 
 if __name__ == "__main__":
-    pro_name = getArgs.getArgs("模板变量.txt")["项目名称"]
+    beg = time.time()
     wb = WordSub(word_file_name="{项目名称}电缆采购合同模板.docx", out_file_name = pro_name + "电缆采购合同.docx")
     ws = WordSub(word_file_name="{项目名称}电缆销售合同模板.docx", out_file_name = pro_name + "电缆销售合同.docx")
     wc = WordSub(word_file_name="{项目名称}电缆协作合同模板.docx", out_file_name = pro_name + "电缆协作合同.docx")
+    print("开始完成销售合同")
     ws.run()
+    print("开始完成采购合同")
     wb.run()
+    print("开始完成协作合同")
     wc.run()
+    end = time.time()
+    print("共花费了"+str(end-beg)+"秒钟的时间")
+    os.system("pause")
+    
