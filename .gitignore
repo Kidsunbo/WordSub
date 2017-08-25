@@ -101,5 +101,5 @@ ENV/
 .mypy_cache/
 
 
-#test file
-*.docx
+#template file
+.template/
