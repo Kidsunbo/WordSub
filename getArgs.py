@@ -1,5 +1,5 @@
 import datetime
-
+import os
 
 
 def getExplain():
@@ -15,15 +15,43 @@ def getExplain():
 def getArgs(file_name:str):
     file = open(file_name,'r')
     result ={}
-    for arg_name,content in (line.split("：") for line in file.readlines() if not line.strip().startswith("#") if line.strip('\n')):
+    for arg_name,content in (line.split("：",1) for line in file.readlines() if not line.strip().startswith("#") if line.strip('\n')):
         result[arg_name]=content.rstrip("\n")
 
+    # add the annual information
+    result.update(__annualVariable())
+
+    # add the Sale Agreement year,month and day
     __addSellYMD(result)
+
+    # add the supplier information
+    __addCompanyInfo(result)
+
+    # check the price
     __checkPrice(result)
+
     return result
 
-def __addSellYMD(lst):
 
+def __addCompanyInfo(lst):
+    global supplier
+    if "供方名称" in lst:
+        supplier = lst["供方名称"]
+    else:
+        raise Exception("不知道供方的名称")
+
+    supplier_location = "./供应商/"+supplier+".txt"
+
+    with open(supplier_location,'r') as supplier_file:
+    	def __innerReplace(content:str):
+    		
+
+        for arg_name, content in (line.split("：",1) for line in supplier_file.readlines() if not line.strip().startswith("#") if
+                                  line.strip('\n')):
+            content = content.replace("{到货期限}",lst["到货期限"])
+            lst[arg_name] = content.replace("\n","")
+
+def __addSellYMD(lst):
     global y
     global m
     global d
@@ -51,8 +79,24 @@ def __checkPrice(lst):
     s = float(lst['销售小写金额'].replace(',',""))
     if not 1.06<s/b<1.08:
         raise Exception("审核一下金额")
-    
-if __name__ == "__main__":
 
-    for i in getArgs("模板变量.txt").items():
+def __annualVariable():
+    lst = {}
+    if os.path.exists("./战略协议/战略相关变量.txt"):
+        f = open("./战略协议/战略相关变量.txt",'r')
+        for arg_name, content in (line.split("：",1) for line in f.readlines() if not line.strip().startswith("#") if
+                                  line.strip('\n')):
+            lst[arg_name] = content.rstrip("\n")
+        f.close()
+        if lst["是否续签"] == "是":
+            lst["续签情况"] = "续"
+        else:
+            lst["续签情况"]=""
+        return lst
+    else:
+        raise Exception("请提供战略协议的相关信息")
+
+
+if __name__ == "__main__":
+    for i in getArgs("项目相关变量.txt").items():
         print(i)

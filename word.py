@@ -6,7 +6,10 @@ import time
 
 
 global pro_name
-pro_name = getArgs.getArgs("模板变量.txt")["项目名称"]
+global variables
+variables = getArgs.getArgs("项目相关变量.txt")
+pro_name = variables["项目名称"]
+pro_type = variables["项目类型"]
 
 def _log(string):
     def outter(fun):
@@ -27,10 +30,9 @@ class WordSub:
 
 
     def __substitute(self,var):
-        lst = getArgs.getArgs("模板变量.txt")
-        if var.strip("{}") not in lst.keys():
+        if var.strip("{}") not in variables.keys():
             raise Exception("请查看一下是否变量名称错误->"+var)
-        return lst[var.strip("{}")]
+        return variables[var.strip("{}")]
 
     @_log(pro_name)
     def run(self):
@@ -86,17 +88,20 @@ class WordSub:
 
 
 if __name__ == "__main__":
-    beg = time.time()
-    wb = WordSub(word_file_name="{项目名称}电缆采购合同模板.docx", out_file_name = pro_name + "电缆采购合同.docx")
-    ws = WordSub(word_file_name="{项目名称}电缆销售合同模板.docx", out_file_name = pro_name + "电缆销售合同.docx")
-    wc = WordSub(word_file_name="{项目名称}电缆协作合同模板.docx", out_file_name = pro_name + "电缆协作合同.docx")
-    print("开始完成销售合同")
-    ws.run()
-    print("开始完成采购合同")
-    wb.run()
-    print("开始完成协作合同")
-    wc.run()
-    end = time.time()
-    print("共花费了"+str(end-beg)+"秒钟的时间")
+    try:
+        beg = time.time()
+        wb = WordSub(word_file_name="./template/{项目名称}{项目类型}采购合同模板.docx", out_file_name = pro_name + pro_type+ "采购合同.docx")
+        ws = WordSub(word_file_name="./template/{项目名称}{项目类型}销售合同模板.docx", out_file_name = pro_name + pro_type+ "销售合同.docx")
+        wc = WordSub(word_file_name="./template/{项目名称}{项目类型}协作合同模板.docx", out_file_name = pro_name + pro_type+ "协作合同.docx")
+        print("开始完成销售合同")
+        ws.run()
+        print("开始完成采购合同")
+        wb.run()
+        print("开始完成协作合同")
+        wc.run()
+        end = time.time()
+        print("共花费了"+str(end-beg)+"秒钟的时间")
+    except Exception as err:
+        print("\n\n有错误发生了，详见下列说明，若有问题请联系孙博\n",str(err))
     os.system("pause")
     
